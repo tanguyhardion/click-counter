@@ -8,4 +8,4 @@ Made with [Eclipse](https://www.eclipse.org/) and [WindowBuilder](https://www.ec
 
 ## Dependencies
 
-This project uses the [FlatLaf Look and Feel](https://www.formdev.com/flatlaf/).
+This project uses the [FlatLaf Look and Feel](https://www.formdev.com/flatlaf/). The JAR can be found on [Maven](https://search.maven.org/artifact/com.formdev/flatlaf/3.1/jar?eh=).
