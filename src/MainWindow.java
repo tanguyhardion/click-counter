@@ -17,11 +17,18 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
 import javax.swing.JToggleButton;
 import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import java.awt.Component;
 
 public class MainWindow {
 
@@ -29,6 +36,7 @@ public class MainWindow {
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private long startTime;	
 	private int clickCounter;
+	private double max;
 	private Timer timer;
 
 	/**
@@ -52,6 +60,14 @@ public class MainWindow {
 	 * Create the application.
 	 */
 	public MainWindow() {
+		String reader = "0";
+		try {
+			reader = new String(Files.readAllBytes(Paths.get("config/max.txt")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println(reader);
+		this.max = reader.isEmpty() ? 0 : Double.valueOf(reader);
 		initialize();
 	}
 
@@ -144,9 +160,16 @@ public class MainWindow {
 		panelSouth.add(tglbtnBloquer);
 		panelSouth.add(Box.createHorizontalStrut(70));
 		
-		JLabel lblCPS = new JLabel("CPS : 0");
+		JLabel lblCPS = new JLabel("CPS : 0,00");
 		lblCPS.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panelSouth.add(lblCPS);
+		
+		Component horizontalStrut = Box.createHorizontalStrut(30);
+		panelSouth.add(horizontalStrut);
+		
+		JLabel lblCPSMax = new JLabel("Max : " + String.format("%.2f", this.max));
+		lblCPSMax.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		panelSouth.add(lblCPSMax);
 		
 		btnMain.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -157,8 +180,6 @@ public class MainWindow {
 					int clicks = btnMain.getText() == "CLIQUEZ-MOI" ? 0 : Integer.valueOf(btnMain.getText());
 					int value = clicks + increment;
 					btnMain.setText(String.valueOf(value));
-					
-					
 					
 		            if (startTime == 0) {
 		               startTime = System.currentTimeMillis();
@@ -174,9 +195,19 @@ public class MainWindow {
 		                        clicksPerSecond = clickCounter / elapsedSeconds;
 		                    }
 
-		                    String result = String.format("%.2f", clicksPerSecond);
+		                    lblCPS.setText("CPS : " + String.format("%.2f", clicksPerSecond));
+		                    
+		                    if (clicksPerSecond > max && elapsedSeconds > 1) {
+		                    	max = clicksPerSecond;
+		                    	lblCPSMax.setText("Max : " + String.format("%.2f", max));
+		                    	try (BufferedWriter bw = new BufferedWriter(new FileWriter("config/max.txt"))) {
 
-		                    lblCPS.setText("CPS : " + result);
+		                            bw.write(String.valueOf(max));
+
+		                        } catch (IOException e1) {
+		                        	e1.printStackTrace();
+		                        }
+		                    }
 		                }
 		            });
 		            timer.start();
